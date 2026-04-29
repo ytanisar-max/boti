@@ -2,22 +2,15 @@ const mineflayer = require('mineflayer');
 const express = require('express');
 const app = express();
 
-// Web Server for UptimeRobot to keep Render alive
-app.get('/', (req, res) => {
-  res.send('Minecraft AFK Bot is running 24/7');
-});
-
+app.get('/', (req, res) => { res.send('Bot is active and moving!'); });
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Web server active on port ${PORT}`);
-});
+app.listen(PORT);
 
-// Minecraft Bot Configuration
 const botArgs = {
-  host: 'in4-1.shulker.in', // Replace with your server IP
+  host: 'in4-1.shulker.in', // Apnar server IP ekhane din
   port: 2843,
   username: 'Zyqorinx_Pro', 
-  version: '1.21.11' 
+  version: '1.21.1' 
 };
 
 let bot;
@@ -26,60 +19,54 @@ function createBot() {
   bot = mineflayer.createBot(botArgs);
 
   bot.on('spawn', () => {
-    console.log('Bot successfully spawned in server');
-    startAFK();
+    console.log('Bot spawned! High activity mode ON.');
+    startHighActivityAFK();
   });
 
-  // Automatically reconnect if disconnected
   bot.on('end', () => {
-    console.log('Connection lost. Reconnecting in 10 seconds...');
     setTimeout(createBot, 10000);
   });
 
-  bot.on('error', (err) => {
-    console.log('Connection Error:', err);
-  });
+  bot.on('error', (err) => console.log(err));
 }
 
-function startAFK() {
-  // 1. Natural Movement (Walking and Jumping)
+function startHighActivityAFK() {
+  // Movement Loop: Chola ebong Lafano
   setInterval(() => {
     if (!bot || !bot.entity) return;
-    
-    const actions = ['forward', 'back', 'left', 'right', 'jump'];
+
+    const actions = ['forward', 'back', 'left', 'right'];
     const randomAction = actions[Math.floor(Math.random() * actions.length)];
-    
+
+    // 1. Chola suru korbe
     bot.setControlState(randomAction, true);
     
-    // Stops moving after 1.5 seconds to avoid falling into holes
+    // 2. Cholche obosthay majhe majhe lafabe
+    if (Math.random() > 0.5) {
+        bot.setControlState('jump', true);
+        setTimeout(() => bot.setControlState('jump', false), 500);
+    }
+
+    // 3. 4 second cholar por 1.5 second thambe (apnar requested timing)
     setTimeout(() => {
       bot.clearControlStates();
-    }, 1500);
-    
-  }, 20000); // Moves every 20 seconds
+    }, 4000); 
 
-  // 2. English Game-Related Chat Messages
+  }, 5500); // Prottek cycle pray 5.5 second-er
+
+  // Natural Chat Messages (English)
   setInterval(() => {
     if (!bot || !bot.entity) return;
-    
     const gameMessages = [
-      "Has anyone found diamonds lately?",
-      "The spawn area looks amazing!",
-      "I need to gather some resources later.",
-      "Watch out for Creepers, guys!",
-      "Does anyone want to trade some emeralds?",
-      "I love the building style on this server.",
-      "Just exploring around for a bit.",
-      "Minecraft's latest update is so cool!",
-      "Going to mine some iron soon.",
-      "Is it nighttime already? Better stay safe."
+      "This world is huge!",
+      "I should build a base somewhere.",
+      "Is anyone mining diamonds?",
+      "Need to find some food soon.",
+      "The view from here is great!",
+      "Does this server have a shop?"
     ];
-    
-    const randomMsg = gameMessages[Math.floor(Math.random() * gameMessages.length)];
-    bot.chat(randomMsg);
-    
-  }, 420000); // Sends a message every 7 minutes
+    bot.chat(gameMessages[Math.floor(Math.random() * gameMessages.length)]);
+  }, 300000); // Every 5 minutes
 }
 
 createBot();
-
