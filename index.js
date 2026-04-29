@@ -14,8 +14,8 @@ app.listen(PORT, () => {
 
 // Minecraft Bot Configuration
 const botArgs = {
-  host: 'YOUR_SERVER_IP', // Replace with your server IP
-  port: 25565,
+  host: 'in4-1.shulker.in', // Replace with your server IP
+  port: 2843,
   username: 'Zyqorinx_Pro', 
   version: '1.21.11' 
 };
