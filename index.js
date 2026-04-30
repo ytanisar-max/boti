@@ -10,7 +10,7 @@ const botArgs = {
   host: 'in4-1.shulker.in', // Replace with your server IP
   port: 2843,
   username: 'Zyqorinx_Pro', 
-  version: '1.21.1' 
+  version: '1.21.11' 
 };
 
 let bot;
