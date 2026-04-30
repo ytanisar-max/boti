@@ -2,7 +2,8 @@ const mineflayer = require('mineflayer');
 const express = require('express');
 const app = express();
 
-app.get('/', (req, res) => { res.send('Bot is active and moving!'); });
+// Web Server for UptimeRobot
+app.get('/', (req, res) => { res.send('AFK Bot with Auto-Auth (anisarkar) is online!'); });
 const PORT = process.env.PORT || 3000;
 app.listen(PORT);
 
@@ -13,73 +14,80 @@ const botArgs = {
   version: '1.21.11' 
 };
 
+// --- CONFIGURATION ---
+const PASSWORD = 'anisarkar'; 
+// ---------------------
+
 let bot;
-let messageInterval;
-let moveInterval;
+let lastMessageTime = 0;
 
 function createBot() {
-  // Purono interval gulo clear kora dorkar jate multiple bot na hoye jay
-  clearInterval(messageInterval);
-  clearInterval(moveInterval);
-
+  if (bot) bot.quit();
   bot = mineflayer.createBot(botArgs);
 
-  bot.on('spawn', () => {
-    console.log('Bot spawned! High activity mode ON.');
-    startHighActivityAFK();
+  // --- AUTO LOGIN / REGISTER LOGIC ---
+  bot.on('messagestr', (message) => {
+    const msg = message.toLowerCase();
+    
+    if (msg.includes('/register')) {
+      bot.chat(`/register ${PASSWORD} ${PASSWORD}`);
+      console.log('[AUTH]: Registered successfully.');
+    } 
+    else if (msg.includes('/login')) {
+      bot.chat(`/login ${PASSWORD}`);
+      console.log('[AUTH]: Logged in successfully.');
+    }
   });
 
+  bot.on('spawn', () => {
+    console.log('Bot spawned successfully!');
+  });
+
+  // --- HIGH ACTIVITY MOVEMENT ---
+  setInterval(() => {
+    if (!bot || !bot.entity) return;
+    const actions = ['forward', 'back', 'left', 'right'];
+    const randomAction = actions[Math.floor(Math.random() * actions.length)];
+
+    bot.setControlState(randomAction, true);
+    if (Math.random() > 0.5) {
+        bot.setControlState('jump', true);
+        setTimeout(() => { if (bot.setControlState) bot.setControlState('jump', false); }, 500);
+    }
+    setTimeout(() => { if (bot.clearControlStates) bot.clearControlStates(); }, 4000); 
+  }, 5500);
+
+  // --- 5-MINUTE CHAT LOGIC ---
+  setInterval(() => {
+    const currentTime = Date.now();
+    if (!bot || !bot.entity || (currentTime - lastMessageTime < 300000)) return;
+
+    const gameMessages = [
+      "Has anyone found diamonds lately?",
+      "The spawn area looks amazing!",
+      "I need to gather some resources later.",
+      "Watch out for Creepers, guys!",
+      "Does anyone want to trade some emeralds?",
+      "I love the building style on this server.",
+      "Just exploring around for a bit.",
+      "Minecraft's latest update is so cool!",
+      "Going to mine some iron soon.",
+      "Is it nighttime already? Better stay safe."
+    ];
+
+    const randomMsg = gameMessages[Math.floor(Math.random() * gameMessages.length)];
+    bot.chat(randomMsg);
+    lastMessageTime = currentTime;
+    console.log(`[CHAT]: ${randomMsg}`);
+  }, 10000);
+
+  // --- AUTO RECONNECT ---
   bot.on('end', () => {
     console.log('Disconnected. Reconnecting in 10 seconds...');
     setTimeout(createBot, 10000);
   });
 
   bot.on('error', (err) => console.log('Error:', err));
-}
-
-function startHighActivityAFK() {
-  // 1. Movement Loop (Active Movement)
-  moveInterval = setInterval(() => {
-    if (!bot || !bot.entity) return;
-
-    const actions = ['forward', 'back', 'left', 'right'];
-    const randomAction = actions[Math.floor(Math.random() * actions.length)];
-
-    bot.setControlState(randomAction, true);
-    
-    if (Math.random() > 0.5) {
-        bot.setControlState('jump', true);
-        setTimeout(() => bot.setControlState('jump', false), 500);
-    }
-
-    setTimeout(() => {
-      if(bot.clearControlStates) bot.clearControlStates();
-    }, 4000); 
-
-  }, 5500); 
-
-  // 2. Optimized Chat Messages (Exactly every 5 minutes)
-  messageInterval = setInterval(() => {
-    if (!bot || !bot.entity) return;
-    
-    const gameMessages = [
-      "This world is huge!",
-      "I should build a base somewhere.",
-      "Is anyone mining diamonds?",
-      "Need to find some food soon.",
-      "The view from here is great!",
-      "Does this server have a shop?",
-      "I love exploring this map.",
-      "Creeper? Aw man!",
-      "Does anyone have spare iron?",
-      "Working on my skills!"
-    ];
-
-    const randomMsg = gameMessages[Math.floor(Math.random() * gameMessages.length)];
-    bot.chat(randomMsg);
-    console.log('Sent message:', randomMsg); // Console-e check korar jonno
-    
-  }, 300000); // 300,000 ms = Exactly 5 minutes
 }
 
 createBot();
