@@ -70,7 +70,7 @@ function createBot() {
       "Does anyone want to trade some emeralds?",
       "I love the building style on this server.",
       "Just exploring around for a bit.",
-      "Minecraft's latest update is so cool!",
+      "I am not the owner the owner is ZyqorinX talk with him if you need any items or...",
       "Going to mine some iron soon.",
       "Is it nighttime already? Better stay safe."
     ];
