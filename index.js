@@ -7,15 +7,21 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT);
 
 const botArgs = {
-  host: 'in4-1.shulker.in', // Apnar server IP ekhane din
+  host: 'in4-1.shulker.in', // Replace with your server IP
   port: 2843,
   username: 'Zyqorinx_Pro', 
   version: '1.21.1' 
 };
 
 let bot;
+let messageInterval;
+let moveInterval;
 
 function createBot() {
+  // Purono interval gulo clear kora dorkar jate multiple bot na hoye jay
+  clearInterval(messageInterval);
+  clearInterval(moveInterval);
+
   bot = mineflayer.createBot(botArgs);
 
   bot.on('spawn', () => {
@@ -24,49 +30,57 @@ function createBot() {
   });
 
   bot.on('end', () => {
+    console.log('Disconnected. Reconnecting in 10 seconds...');
     setTimeout(createBot, 10000);
   });
 
-  bot.on('error', (err) => console.log(err));
+  bot.on('error', (err) => console.log('Error:', err));
 }
 
 function startHighActivityAFK() {
-  // Movement Loop: Chola ebong Lafano
-  setInterval(() => {
+  // 1. Movement Loop (Active Movement)
+  moveInterval = setInterval(() => {
     if (!bot || !bot.entity) return;
 
     const actions = ['forward', 'back', 'left', 'right'];
     const randomAction = actions[Math.floor(Math.random() * actions.length)];
 
-    // 1. Chola suru korbe
     bot.setControlState(randomAction, true);
     
-    // 2. Cholche obosthay majhe majhe lafabe
     if (Math.random() > 0.5) {
         bot.setControlState('jump', true);
         setTimeout(() => bot.setControlState('jump', false), 500);
     }
 
-    // 3. 4 second cholar por 1.5 second thambe (apnar requested timing)
     setTimeout(() => {
-      bot.clearControlStates();
+      if(bot.clearControlStates) bot.clearControlStates();
     }, 4000); 
 
-  }, 5500); // Prottek cycle pray 5.5 second-er
+  }, 5500); 
 
-  // Natural Chat Messages (English)
-  setInterval(() => {
+  // 2. Optimized Chat Messages (Exactly every 5 minutes)
+  messageInterval = setInterval(() => {
     if (!bot || !bot.entity) return;
+    
     const gameMessages = [
       "This world is huge!",
       "I should build a base somewhere.",
       "Is anyone mining diamonds?",
       "Need to find some food soon.",
       "The view from here is great!",
-      "Does this server have a shop?"
+      "Does this server have a shop?",
+      "I love exploring this map.",
+      "Creeper? Aw man!",
+      "Does anyone have spare iron?",
+      "Working on my skills!"
     ];
-    bot.chat(gameMessages[Math.floor(Math.random() * gameMessages.length)]);
-  }, 300000); // Every 5 minutes
+
+    const randomMsg = gameMessages[Math.floor(Math.random() * gameMessages.length)];
+    bot.chat(randomMsg);
+    console.log('Sent message:', randomMsg); // Console-e check korar jonno
+    
+  }, 300000); // 300,000 ms = Exactly 5 minutes
 }
 
 createBot();
+
